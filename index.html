@@ -61,7 +61,10 @@
 
     <div class="modal-section">
       <p class="modal-section-label">URL Worker proxy (opsional — kosongkan untuk pakai Worker resmi AGE YT#)</p>
-      <input id="worker-url-input" class="field-input" type="text" placeholder="https://age-yt-proxy.kitakustik-managemen.workers.dev/" />
+      <div class="worker-url-row">
+        <input id="worker-url-input" class="field-input" type="password" autocomplete="off" placeholder="https://alamat-worker-kamu.workers.dev/" />
+        <button id="toggle-worker-visibility-btn" type="button" class="btn-ghost btn-icon" title="Tampilkan/sembunyikan URL">👁</button>
+      </div>
       <div class="modal-actions">
         <button id="save-worker-url-btn" class="btn-ghost">Simpan URL Worker</button>
       </div>
