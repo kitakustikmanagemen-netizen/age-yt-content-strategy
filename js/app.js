@@ -222,8 +222,8 @@ async function handleGenerate(isRetry) {
   setGenerating(true);
 
   try {
-    const text = await callWorker(workerUrl, apiKey, prompt, f.maxTokens);
-    showOutput(f, text, audience);
+    const { text, finishReason } = await callWorker(workerUrl, apiKey, prompt, f.maxTokens, f.temperature);
+    showOutput(f, text, audience, finishReason);
   } catch (err) {
     handleError(err);
   } finally {
@@ -240,9 +240,10 @@ function setGenerating(on) {
   txt.textContent = on ? "⏳ Membuat konten..." : "✨ Generate";
 }
 
-async function callWorker(workerUrl, apiKey, prompt, maxTokens) {
+async function callWorker(workerUrl, apiKey, prompt, maxTokens, temperature) {
   const body = { apiKey, model: DEFAULT_GEMINI_MODEL, prompt };
   if (maxTokens) body.maxTokens = maxTokens;
+  if (temperature !== undefined) body.temperature = temperature;
 
   const res = await fetch(workerUrl, {
     method : "POST",
@@ -259,7 +260,7 @@ async function callWorker(workerUrl, apiKey, prompt, maxTokens) {
 
   const data = await res.json();
   if (!data.text) throw new Error("Respons dari API kosong atau tidak sesuai format.");
-  return data.text;
+  return { text: data.text, finishReason: data.finishReason || null };
 }
 
 function handleError(err) {
@@ -289,7 +290,7 @@ function showError(msg) {
 
 let lastOutput = { feature: null, text: "", audience: "" };
 
-function showOutput(feature, text, audience) {
+function showOutput(feature, text, audience, finishReason) {
   lastOutput = { feature, text, audience };
 
   const panel = document.getElementById("output-panel");
@@ -303,6 +304,11 @@ function showOutput(feature, text, audience) {
 
   const outEl = document.getElementById("output-text");
   outEl.textContent = text;
+
+  if (finishReason === "MAX_TOKENS") {
+    showToast("⚠️ Jawaban mungkin masih kepotong (limit token tercapai). Coba tekan Generate lagi.", "warn");
+  }
+
   panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
