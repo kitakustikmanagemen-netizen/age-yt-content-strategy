@@ -388,6 +388,11 @@ function addKey() {
 function openModal()  { document.getElementById("key-modal").classList.remove("hidden"); renderKeySettings(); }
 function closeModal() { document.getElementById("key-modal").classList.add("hidden"); }
 
+function toggleWorkerVisibility() {
+  const inp = document.getElementById("worker-url-input");
+  inp.type = inp.type === "password" ? "text" : "password";
+}
+
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
 function showToast(msg, type = "") {
@@ -412,6 +417,7 @@ function init() {
     saveWorkerUrl(document.getElementById("worker-url-input").value);
     flash("save-worker-url-btn", "✅ Tersimpan");
   });
+  document.getElementById("toggle-worker-visibility-btn").addEventListener("click", toggleWorkerVisibility);
 
   // tutup modal kalau klik di luar
   document.getElementById("key-modal").addEventListener("click", e => {
