@@ -63,11 +63,18 @@ Setiap ide: judul singkat + 1 kalimat penjelasan format/pendekatannya. Tulis dal
       label: "Frekuensi posting",
       options: ["Setiap hari", "3x seminggu", "5x seminggu", "2x sehari"],
     },
+    maxTokens: 8000,
     buildPrompt: (ctx) => `Kamu adalah content planner untuk kreator ${ctx.platform}.
-Buatkan rencana kalender konten 30 hari berdasarkan niche berikut, dengan frekuensi posting: ${ctx.frequency || "3x seminggu"}.
+Buatkan rencana kalender konten 30 hari (Hari 1 sampai Hari 30) berdasarkan niche berikut, dengan frekuensi posting: ${ctx.frequency || "3x seminggu"}.
 
 ${ctxLine("Niche/topik utama", ctx.topic)}${ctxLine("Target penonton", ctx.audience)}${ctxLine("Catatan tambahan", ctx.detail)}
-Format output sebagai tabel teks per hari (hanya hari yang ada jadwal postingnya sesuai frekuensi): Hari ke berapa, judul/ide konten, format (video/foto/carousel), dan tujuan konten (edukasi/hiburan/promosi/engagement). Variasikan tema tiap minggu supaya tidak monoton. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris).`,
+ATURAN OUTPUT (WAJIB DIIKUTI):
+- JANGAN tulis kalimat pembuka, penjelasan, atau basa-basi apapun. Langsung mulai dari tabel.
+- Format tabel Markdown dengan kolom: Hari | Ide Konten | Format | Tujuan.
+- Isi kolom "Ide Konten" SINGKAT, maksimal 8 kata per baris.
+- WAJIB tercantum LENGKAP semua hari sesuai frekuensi posting sampai Hari ke-30 — jangan berhenti di tengah, jangan dipotong.
+- Boleh kelompokkan per minggu dengan sub-judul singkat (maksimal 5 kata), tapi tetap prioritaskan kelengkapan tabel sampai Hari 30 dibanding elaborasi tambahan.
+- Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris) — tapi tetap ikuti aturan ringkas di atas.`,
   },
   {
     id: "niche-scorer",
