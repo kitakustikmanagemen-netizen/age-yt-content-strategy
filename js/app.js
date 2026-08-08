@@ -222,7 +222,7 @@ async function handleGenerate(isRetry) {
   setGenerating(true);
 
   try {
-    const text = await callWorker(workerUrl, apiKey, prompt);
+    const text = await callWorker(workerUrl, apiKey, prompt, f.maxTokens);
     showOutput(f, text, audience);
   } catch (err) {
     handleError(err);
@@ -240,11 +240,14 @@ function setGenerating(on) {
   txt.textContent = on ? "⏳ Membuat konten..." : "✨ Generate";
 }
 
-async function callWorker(workerUrl, apiKey, prompt) {
+async function callWorker(workerUrl, apiKey, prompt, maxTokens) {
+  const body = { apiKey, model: DEFAULT_GEMINI_MODEL, prompt };
+  if (maxTokens) body.maxTokens = maxTokens;
+
   const res = await fetch(workerUrl, {
     method : "POST",
     headers: { "Content-Type": "application/json" },
-    body   : JSON.stringify({ apiKey, model: DEFAULT_GEMINI_MODEL, prompt }),
+    body   : JSON.stringify(body),
   });
 
   if (!res.ok) {
