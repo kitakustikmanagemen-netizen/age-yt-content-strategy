@@ -374,4 +374,10 @@ html, body {
   border-radius: 999px;
   font-size: 13px;
   z-index: 60;
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.warn {
+  border-color: #FFB020;
+  color: #FFD98A;
 }
