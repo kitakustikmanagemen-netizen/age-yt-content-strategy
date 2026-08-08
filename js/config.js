@@ -30,11 +30,12 @@ const FEATURES = [
     color: "#FF6B35",
     topicLabel: "Niche / kategori akun kamu",
     topicPlaceholder: "Contoh: resep masakan rumahan, tips finansial anak muda",
+    maxTokens: 4096,
     buildPrompt: (ctx) => `Kamu adalah social media strategist yang paham tren konten terkini.
 Buatkan daftar 8 topik konten yang berpotensi trending untuk niche berikut, khusus platform ${ctx.platform}.
 
 ${ctxLine("Niche/kategori", ctx.topic)}${ctxLine("Target penonton", ctx.audience)}${ctxLine("Catatan tambahan", ctx.detail)}
-Untuk tiap topik, sertakan: judul topik, kenapa berpotensi menarik perhatian saat ini, dan sudut pandang (angle) unik yang bisa dipakai supaya tidak generic. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka tulis dalam Bahasa Inggris), format rapi dan mudah dibaca di HP.`,
+JANGAN tulis kalimat pembuka/sapaan/penutup apapun — langsung mulai dari topik #1. Untuk tiap topik, sertakan: judul topik, kenapa berpotensi menarik perhatian saat ini, dan sudut pandang (angle) unik yang bisa dipakai supaya tidak generic — tapi tetap ringkas (maksimal 3 baris per topik). WAJIB sampai topik ke-8, jangan berhenti di tengah. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka tulis dalam Bahasa Inggris), format rapi dan mudah dibaca di HP.`,
   },
   {
     id: "idea-generator",
@@ -44,11 +45,12 @@ Untuk tiap topik, sertakan: judul topik, kenapa berpotensi menarik perhatian saa
     color: "#FFC145",
     topicLabel: "Topik / ide konten",
     topicPlaceholder: "Contoh: tips hemat belanja bulanan untuk anak kos",
+    maxTokens: 4096,
     buildPrompt: (ctx) => `Kamu adalah content ideator untuk kreator ${ctx.platform}.
 Dari satu topik berikut, buatkan 10 variasi ide konten yang berbeda sudut pandang (bisa berupa daftar/listicle, cerita personal, tutorial, mitos vs fakta, tanya-jawab, before-after, dsb).
 
 ${ctxLine("Topik", ctx.topic)}${ctxLine("Target penonton", ctx.audience)}${ctxLine("Catatan tambahan", ctx.detail)}
-Setiap ide: judul singkat + 1 kalimat penjelasan format/pendekatannya. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris), rapi dan mudah discan cepat.`,
+JANGAN tulis kalimat pembuka/sapaan/penutup apapun — langsung mulai dari ide #1. Setiap ide: judul singkat + 1 kalimat penjelasan format/pendekatannya. WAJIB sampai ide ke-10, jangan berhenti di tengah. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris), rapi dan mudah discan cepat.`,
   },
   {
     id: "content-calendar",
@@ -63,17 +65,19 @@ Setiap ide: judul singkat + 1 kalimat penjelasan format/pendekatannya. Tulis dal
       label: "Frekuensi posting",
       options: ["Setiap hari", "3x seminggu", "5x seminggu", "2x sehari"],
     },
-    maxTokens: 8000,
+    maxTokens: 12000,
+    temperature: 0.55,
     buildPrompt: (ctx) => `Kamu adalah content planner untuk kreator ${ctx.platform}.
 Buatkan rencana kalender konten 30 hari (Hari 1 sampai Hari 30) berdasarkan niche berikut, dengan frekuensi posting: ${ctx.frequency || "3x seminggu"}.
 
 ${ctxLine("Niche/topik utama", ctx.topic)}${ctxLine("Target penonton", ctx.audience)}${ctxLine("Catatan tambahan", ctx.detail)}
-ATURAN OUTPUT (WAJIB DIIKUTI):
-- JANGAN tulis kalimat pembuka, penjelasan, atau basa-basi apapun. Langsung mulai dari tabel.
+ATURAN OUTPUT (WAJIB DIIKUTI, TANPA PENGECUALIAN):
+- DILARANG menulis kalimat pembuka/sapaan apapun seperti "Halo", "Tentu", "Sebagai content planner", dsb. Karakter PERTAMA yang kamu tulis harus langsung baris tabel.
+- DILARANG menulis kalimat penutup/kesimpulan di akhir.
 - Format tabel Markdown dengan kolom: Hari | Ide Konten | Format | Tujuan.
-- Isi kolom "Ide Konten" SINGKAT, maksimal 8 kata per baris.
-- WAJIB tercantum LENGKAP semua hari sesuai frekuensi posting sampai Hari ke-30 — jangan berhenti di tengah, jangan dipotong.
-- Boleh kelompokkan per minggu dengan sub-judul singkat (maksimal 5 kata), tapi tetap prioritaskan kelengkapan tabel sampai Hari 30 dibanding elaborasi tambahan.
+- Isi kolom "Ide Konten" SINGKAT, maksimal 6 kata per baris. Jangan pakai bold/italic berlebihan.
+- WAJIB tercantum LENGKAP semua hari sesuai frekuensi posting sampai Hari ke-30 — jangan berhenti di tengah, jangan dipotong. Ini instruksi paling penting.
+- Boleh kelompokkan per minggu dengan sub-judul singkat (maksimal 4 kata), tapi kelengkapan tabel sampai Hari 30 jauh lebih penting daripada elaborasi tambahan.
 - Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris) — tapi tetap ikuti aturan ringkas di atas.`,
   },
   {
@@ -89,11 +93,12 @@ ATURAN OUTPUT (WAJIB DIIKUTI):
       label: "Model monetisasi yang direncanakan",
       options: ["Affiliate marketing", "Jual produk sendiri", "Jasa/endorse", "Iklan platform (AdSense/Bonus Kreator)", "Belum tahu"],
     },
+    maxTokens: 3072,
     buildPrompt: (ctx) => `Kamu adalah konsultan strategi monetisasi konten kreator.
 Nilai potensi profitabilitas niche berikut untuk platform ${ctx.platform}, dengan rencana monetisasi: ${ctx.monetization || "belum ditentukan"}.
 
 ${ctxLine("Niche", ctx.topic)}${ctxLine("Target penonton", ctx.audience)}${ctxLine("Catatan tambahan", ctx.detail)}
-Berikan: (1) skor potensi profitabilitas 1-10 beserta alasannya, (2) tingkat persaingan (rendah/sedang/tinggi), (3) potensi sumber pendapatan yang realistis untuk niche ini, (4) 3 saran konkret untuk memperbesar peluang cuan di niche ini. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris), jujur dan tidak berlebihan optimis.`,
+JANGAN tulis kalimat pembuka/sapaan apapun — langsung ke poin (1). Berikan: (1) skor potensi profitabilitas 1-10 beserta alasannya, (2) tingkat persaingan (rendah/sedang/tinggi), (3) potensi sumber pendapatan yang realistis untuk niche ini, (4) 3 saran konkret untuk memperbesar peluang cuan di niche ini. WAJIB sampai poin (4) selesai, jangan berhenti di tengah. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris), jujur dan tidak berlebihan optimis.`,
   },
   {
     id: "competitor-analyzer",
@@ -108,11 +113,12 @@ Berikan: (1) skor potensi profitabilitas 1-10 beserta alasannya, (2) tingkat per
       label: "Info akun kompetitor (nama/gaya konten, opsional)",
       placeholder: "Contoh: @namaakun, sering pakai format komedi + review jujur",
     },
+    maxTokens: 3072,
     buildPrompt: (ctx) => `Kamu adalah analis strategi konten kompetitor untuk kreator ${ctx.platform}.
 Analisa gaya & strategi konten kompetitor pada niche berikut.
 
 ${ctxLine("Niche akun kompetitor", ctx.topic)}${ctxLine("Info kompetitor", ctx.competitorInfo)}${ctxLine("Target penonton", ctx.audience)}${ctxLine("Catatan tambahan", ctx.detail)}
-Berikan: (1) kemungkinan pola konten yang membuat kompetitor di niche ini berhasil (hook, format, jadwal posting), (2) celah/gap yang mungkin belum digarap kompetitor di niche ini, (3) 3 ide konten yang bisa membedakan diri (differentiation) dari kompetitor sejenis. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris).`,
+JANGAN tulis kalimat pembuka/sapaan apapun — langsung ke poin (1). Berikan: (1) kemungkinan pola konten yang membuat kompetitor di niche ini berhasil (hook, format, jadwal posting), (2) celah/gap yang mungkin belum digarap kompetitor di niche ini, (3) 3 ide konten yang bisa membedakan diri (differentiation) dari kompetitor sejenis. WAJIB sampai poin (3) selesai, jangan berhenti di tengah. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris).`,
   },
   {
     id: "brand-voice",
@@ -128,10 +134,11 @@ Berikan: (1) kemungkinan pola konten yang membuat kompetitor di niche ini berhas
       type: "textarea",
       placeholder: "Tempel contoh caption atau naskah kamu di sini...",
     },
+    maxTokens: 3072,
     buildPrompt: (ctx) => `Kamu adalah brand voice consultant untuk kreator ${ctx.platform}.
 Rumuskan panduan gaya bahasa (brand voice) berdasarkan deskripsi akun berikut${ctx.sampleText ? " dan contoh tulisan yang diberikan" : ""}.
 
 ${ctxLine("Deskripsi akun/brand", ctx.topic)}${ctxLine("Target penonton", ctx.audience)}${ctxLine("Catatan tambahan", ctx.detail)}${ctx.sampleText ? `\nContoh tulisan sebelumnya:\n"""${ctx.sampleText}"""\n` : ""}
-Berikan panduan brand voice yang berisi: (1) 3-5 kata sifat yang mendeskripsikan tone (misal: santai, tegas, hangat), (2) hal yang SEBAIKNYA dilakukan dalam penulisan caption/naskah, (3) hal yang SEBAIKNYA dihindari, (4) 1 contoh kalimat pembuka (hook) yang mencerminkan brand voice ini. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris).`,
+JANGAN tulis kalimat pembuka/sapaan apapun — langsung ke poin (1). Berikan panduan brand voice yang berisi: (1) 3-5 kata sifat yang mendeskripsikan tone (misal: santai, tegas, hangat), (2) hal yang SEBAIKNYA dilakukan dalam penulisan caption/naskah, (3) hal yang SEBAIKNYA dihindari, (4) 1 contoh kalimat pembuka (hook) yang mencerminkan brand voice ini. WAJIB sampai poin (4) selesai, jangan berhenti di tengah. Tulis dalam Bahasa Indonesia (kecuali audiens Global/English, maka Bahasa Inggris).`,
   },
 ];
