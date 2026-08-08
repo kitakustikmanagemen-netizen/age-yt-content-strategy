@@ -219,25 +219,52 @@ async function handleGenerate(isRetry) {
   if (extraEl && f.extraField) ctx[f.extraField.id] = extraEl.value.trim();
 
   const prompt = f.buildPrompt(ctx);
-  setGenerating(true);
-
-  try {
-    const { text, finishReason } = await callWorker(workerUrl, apiKey, prompt, f.maxTokens, f.temperature);
-    showOutput(f, text, audience, finishReason);
-  } catch (err) {
-    handleError(err);
-  } finally {
-    setGenerating(false);
-  }
+  await generateWithAutoComplete(f, prompt, workerUrl, apiKey, audience);
 }
 
-function setGenerating(on) {
+// Auto-lengkapi otomatis kalau hasil kepotong karena limit token (finishReason
+// MAX_TOKENS) — naikkan maxTokens bertahap & generate ulang SENDIRI di background,
+// user tidak perlu klik Generate berkali-kali. User hanya perlu generate ulang manual
+// kalau memang tidak cocok dengan ISI hasilnya (bukan karena kepotong).
+const MAX_AUTO_COMPLETE_TRIES = 2; // total percobaan = 1 (awal) + 2 (auto-lengkapi) = 3
+
+async function generateWithAutoComplete(f, prompt, workerUrl, apiKey, audience) {
+  setGenerating(true);
+
+  let attempt = 0;
+  let currentMaxTokens = f.maxTokens || 2048;
+  let result;
+
+  while (true) {
+    if (attempt > 0) {
+      setGenerating(true, `⏳ Melengkapi hasil (percobaan ${attempt + 1}/${MAX_AUTO_COMPLETE_TRIES + 1})...`);
+    }
+    try {
+      result = await callWorker(workerUrl, apiKey, prompt, currentMaxTokens, f.temperature);
+    } catch (err) {
+      setGenerating(false);
+      handleError(err);
+      return;
+    }
+
+    const isCutOff = result.finishReason === "MAX_TOKENS";
+    if (!isCutOff || attempt >= MAX_AUTO_COMPLETE_TRIES) break;
+
+    attempt++;
+    currentMaxTokens = Math.min(Math.round(currentMaxTokens * 1.6), 16000);
+  }
+
+  setGenerating(false);
+  showOutput(f, result.text, audience, result.finishReason);
+}
+
+function setGenerating(on, label) {
   state.isGenerating = on;
   const btn  = document.getElementById("generate-btn");
   const txt  = document.getElementById("generate-btn-text");
   if (!btn) return;
   btn.disabled  = on;
-  txt.textContent = on ? "⏳ Membuat konten..." : "✨ Generate";
+  txt.textContent = on ? (label || "⏳ Membuat konten...") : "✨ Generate";
 }
 
 async function callWorker(workerUrl, apiKey, prompt, maxTokens, temperature) {
@@ -306,7 +333,7 @@ function showOutput(feature, text, audience, finishReason) {
   outEl.textContent = text;
 
   if (finishReason === "MAX_TOKENS") {
-    showToast("⚠️ Jawaban mungkin masih kepotong (limit token tercapai). Coba tekan Generate lagi.", "warn");
+    showToast("⚠️ Hasil masih belum lengkap meski sudah dicoba ulang otomatis. Coba persempit topik/detail, lalu Generate lagi.", "warn");
   }
 
   panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
